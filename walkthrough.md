@@ -232,4 +232,14 @@ re-adds `batch_encode_plus`/`encode_plus` to `PreTrainedTokenizerBase` as a
 No-op on transformers 4.x. Verified on 5.16.1: method appears after `apply()`
 and correctly delegates with all kwargs preserved.
 
+## 15. Notebook: live-stream training output
+
+**Symptom**: the notebook printed only the `TRAIN specifier: in ...` banner and
+showed nothing for the rest of a long epoch — looked like a hang. Cause: the
+`run()` helper used `subprocess.run(..., capture_output=True)` and only printed
+a tail when the process exited. Replaced it with a `Popen`-based helper that
+merges child stdout+stderr and prints every line as it arrives (so per-epoch
+summaries and eval logs stream live), while still keeping the last ~200 lines
+for a useful error tail on failure.
+
 <!-- Append new entries at the end as work progresses. -->
