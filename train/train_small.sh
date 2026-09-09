@@ -13,7 +13,7 @@ for specifier in $SPECIFIERS; do
     OUTPUT_DIR="$TRAINED_MODEL_PATH/modernbert_$specifier"
 
     python ../contriever/finetuning.py \
-        --model_path answerai/ModernBERT-base \
+        --model_path answerdotai/ModernBERT-base \
         --train_data $DATA_PATH/train_$specifier.jsonl \
         --eval_data $DATA_PATH/dev_$specifier.jsonl \
         --negative_ctxs 5 \

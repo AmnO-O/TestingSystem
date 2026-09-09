@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 from src.contriever import load_retriever, ModernBertRetriever
 
-MODEL_ID = "answerai/ModernBERT-base"
+MODEL_ID = "answerdotai/ModernBERT-base"
 PAD = 0
 
 

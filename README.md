@@ -66,7 +66,7 @@ Contriever path fully working (dispatch is by model id substring).
 
 - **Verify** (local, offline-safe): `python contriever/verify_modernbert.py`
 - **Train Phase 1 subset** (`in`, `after`, `before`): `bash train/train_small.sh`
-  (base model: `answerai/ModernBERT-base`; see `plan.md` for the phased plan)
+  (base model: `answerdotai/ModernBERT-base`; see `plan.md` for the phased plan)
 - **Merge** the per-specifier best checkpoints: `python train/merge_models.py
   --model_paths <dir1> <dir2> ... --output_dir <merged> --mode avg`
 - **Evaluate** (BEIR): `python contriever/eval_beir.py --model_name_or_path

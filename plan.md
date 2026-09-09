@@ -114,7 +114,7 @@ normalize=True)` (input_ids + attention_mask only) → works with
 ## 4. Unit verification (before any training)
 
 Script: `contriever/verify_modernbert.py` (new, temporary):
-1. Load `answerai/ModernBERT-base` through `load_retriever` → assert returned
+1. Load `answerdotai/ModernBERT-base` through `load_retriever` → assert returned
    model is `ModernBertRetriever`.
 2. Mean-pooling correctness: batch of 2 short encodings padded to same length;
    assert no NaN, and that a padded row's contribution is excluded (compare
@@ -134,7 +134,7 @@ to end.
 ModernBERT is not a strong retriever out of the box. Options:
 
 - **(A) Raw start** *(DECIDED)*: finetune directly from
-  `answerai/ModernBERT-base` with the existing hard-negative fine-tuning recipe.
+  `answerdotai/ModernBERT-base` with the existing hard-negative fine-tuning recipe.
   Simplest; may need many negatives / longer training to compensate for no
   contrastive pretraining.
 - **(B) Retriever-oriented base** *(recommended, if task allows)*: start from an
@@ -149,7 +149,7 @@ ModernBERT is not a strong retriever out of the box. Options:
 
 **Recommendation**: start with (A) to validate the pipeline cheaply; if quality
 lags baseline, move to (B) or (C). **Decision confirmed: (A) — raw
-`answerai/ModernBERT-base`.**
+`answerdotai/ModernBERT-base`.**
 
 ---
 
@@ -297,7 +297,7 @@ choice before shipping.
 
 ## 12. Decisions (recorded)
 
-1. **Base checkpoint: (A) `answerai/ModernBERT-base`** — direct finetune from
+1. **Base checkpoint: (A) `answerdotai/ModernBERT-base`** — direct finetune from
    raw MLM model; revisit (B) retriever-oriented base or (C) our own contrastive
    pretraining only if quality lags baseline at M5.
 2. **Merge mode: plain equal-weight parameter averaging**; task-vector kept as a

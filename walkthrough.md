@@ -7,10 +7,10 @@ Living document. Each entry = what was changed and why.
 ## 1. `plan.md` (new)
 
 **Why**: full build/migration plan for replacing the Contriever encoder with a
-ModernBERT encoder (base `answerai/ModernBERT-base`, plain parameter-averaging
+ModernBERT encoder (base `answerdotai/ModernBERT-base`, plain parameter-averaging
 merge, phased training — small specifier subset first, runtime on Kaggle/Colab).
 Recorded decisions:
-- base = raw `answerai/ModernBERT-base` (retriever-oriented/contrastive bases
+- base = raw `answerdotai/ModernBERT-base` (retriever-oriented/contrastive bases
   kept as fallbacks if Phase-1 quality lags);
 - merge = equal-weight parameter averaging (custom merger, no LM_Cocktail dep);
 - training = Phase 1 subset (`in`, `after`, `before`) → gate → Phase 2 (all 7);
@@ -45,7 +45,7 @@ ModernBERT's `forward` does **not** accept `token_type_ids` / `head_mask` /
 ### 3.3 Dispatch in `load_retriever` (both branches)
 **Why**: `load_retriever` picks the encoder class by substrings in the model id.
 Added `elif "modernbert" in retriever_model_id.lower():` (case-insensitive, since
-the hub id is `answerai/ModernBERT-base`) in both the local `checkpoint.pth`
+the hub id is `answerdotai/ModernBERT-base`) in both the local `checkpoint.pth`
 branch and the straight HuggingFace branch, so ModernBERT checkpoints build a
 `ModernBertRetriever` instead of falling through to the BERT-backed `Contriever`.
 
@@ -73,7 +73,7 @@ case so the MoCo momentum-encoder training path supports ModernBERT.
 ## 6. `contriever/verify_modernbert.py` (new)
 
 **Why**: M1 unit verification. Runs:
-- real-model path: `load_retriever("answerai/ModernBERT-base")` → asserts the
+- real-model path: `load_retriever("answerdotai/ModernBERT-base")` → asserts the
   returned model is a `ModernBertRetriever` (dispatch), embeds a padded batch
   (finite, pad-invariance: same text with different padding lengths → same
   embedding), checks normalized embeddings are unit-norm, and probes a temporal
@@ -204,5 +204,13 @@ Verified locally (mirroring beir_utils import order — `torch` first, then
 stub, then beir): `find_spec` OK, lexical/dense/evaluation/data_loader chains
 all import. `beir.util` needs `requests`/`tqdm` (beir 1.0.0 ships no
 `requires_dist`) — both already preinstalled on Kaggle.
+
+**Fifth failure (wrong base-model id)**: with imports fixed, training finally
+ran but died before the first step: `401 Unauthorized` /
+`RepositoryNotFoundError` downloading `answerai/ModernBERT-base`. The official
+Hub repo id is **`answerdotai/ModernBERT-base`** (owner `answerdotai`).
+Renamed in all six places: notebook CONFIG, `README.md`, `plan.md`,
+`walkthrough.md`, `train/train_small.sh`, `contriever/verify_modernbert.py`.
+The retriever dispatch (`"modernbert" in model_id.lower()`) is unaffected.
 
 <!-- Append new entries at the end as work progresses. -->
