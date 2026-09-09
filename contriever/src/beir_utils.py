@@ -7,6 +7,21 @@ import numpy as np
 import torch
 import torch.distributed as dist
 
+# beir 1.0.0 hard-imports the elasticsearch package (evaluation -> BM25Search ->
+# elastic_search), which crashes under numpy 2 (`np.float_` was removed). The dense
+# retrieval pipeline never uses BM25/ES, so stub the module before any beir import.
+import sys
+import types as _types
+
+if "elasticsearch" not in sys.modules:
+    _fake_es = _types.ModuleType("elasticsearch")
+
+    def _not_implemented(*args, **kwargs):
+        raise NotImplementedError("elasticsearch is stubbed out; BM25 search is not used")
+
+    _fake_es.Elasticsearch = type("Elasticsearch", (), {"__init__": _not_implemented})
+    sys.modules["elasticsearch"] = _fake_es
+
 import beir.util
 from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval

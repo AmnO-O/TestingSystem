@@ -167,4 +167,15 @@ cell now runs
 `pip install -q -U transformers tokenizers safetensors beir==1.0.0 faiss-cpu`
 (`faiss-cpu` for the dense-search eval path, preinstalled on Kaggle anyway).
 
+**Second failure (numpy 2)**: with `beir` installed, the next crash was
+`beir/retrieval/evaluation.py` → `.search.lexical.BM25Search` →
+`elasticsearch` package → `np.float_` removed in NumPy 2 (Kaggle ships numpy
+2.x + a numpy-2-incompatible `elasticsearch` client). The dense retrieval
+pipeline never uses BM25/ES, so `src/beir_utils.py` now **stubs the
+`elasticsearch` module in `sys.modules` before any `beir` import** (verified
+locally under numpy 2.5: the ES import error disappears; the stub is never
+instantiated). `pytrec_eval` and `faiss` are preinstalled on Kaggle (beir
+1.0.0 ships no `requires_dist` metadata, so pip does not pull them); notebook
+install cell also adds `pytrec-eval` defensively.
+
 <!-- Append new entries at the end as work progresses. -->
