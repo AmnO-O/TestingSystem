@@ -148,4 +148,23 @@ every epoch `finetuning()`:
 
 No new CLI flags; the Kaggle notebook's "Train per specifier" md notes this.
 
+## 12. BEIR dependency fix (Kaggle failure)
+
+**Symptom**: first smoke run died in 20s with
+`ModuleNotFoundError: No module named 'beir'` — `contriever/finetuning.py` imports
+`src/beir_utils.py`, which imports the `beir` package unconditionally; the
+notebook never installed it.
+
+**Root cause (worse than just a missing package)**: root `requirements.txt`
+pinned `beir==2.2.0`, but `src/beir_utils.py` only works with the **beir 1.x**
+layout (`beir.util`, `beir.datasets.data_loader`, `beir.retrieval.search.dense`,
+`beir.reranking`). PyPI `beir` 1.0.0 was verified to ship all those modules and
+its distribution carries **no `requires_dist`** (so `pip` won't downgrade
+`transformers`/`torch`). `beir==2.2.0` is an incompatible rewrite.
+
+**Fix**: root `requirements.txt` re-pinned to `beir==1.0.0`; notebook install
+cell now runs
+`pip install -q -U transformers tokenizers safetensors beir==1.0.0 faiss-cpu`
+(`faiss-cpu` for the dense-search eval path, preinstalled on Kaggle anyway).
+
 <!-- Append new entries at the end as work progresses. -->

@@ -5,7 +5,7 @@ aiohttp==3.13.2
 aiosignal==1.4.0
 anyio==4.12.0
 attrs==25.4.0
-beir==2.2.0
+beir==1.0.0  # code uses beir 1.x layout (beir.retrieval.search.dense, beir.reranking); 2.x is an incompatible rewrite
 certifi==2025.11.12
 charset-normalizer==3.4.4
 datasets==4.4.1
