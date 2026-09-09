@@ -242,4 +242,14 @@ merges child stdout+stderr and prints every line as it arrives (so per-epoch
 summaries and eval logs stream live), while still keeping the last ~200 lines
 for a useful error tail on failure.
 
+## 16. Notebook: optional HuggingFace Hub push of the merged model
+
+Added a final cell (after the `/kaggle/output` copy) that uploads the merged
+model's HF-format files (`pytorch_model.bin` + `config.json` + tokenizer) to
+`HF_REPO` when `HF_TOKEN` is set (`UPLOAD_TO_HF`, `HF_REPO`, `HF_PRIVATE`
+added to CONFIG). Skipped silently otherwise. The `checkpoint.pth` (582 MB,
+training-pipeline artifact) is deliberately **not** uploaded — `eval_beir.py`
+loads from the HF repo id via the else-branch of `load_retriever`, and that
+dispatch matches `"modernbert"` in the repo id.
+
 <!-- Append new entries at the end as work progresses. -->
