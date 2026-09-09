@@ -120,4 +120,18 @@ merger (decision: plain equal-weight average). Custom path:
 - `--tool lm_cocktail` keeps the old LM_Cocktail path for cross-checking.
 - Tested end-to-end offline on synthetic tiny ModernBERT checkpoints.
 
+## 10. `KaggleModernBert.ipynb` (new)
+
+**Why**: a single, self-contained Kaggle notebook so the whole Phase-1 run is
+"upload and Run All" — no shell babysitting. Cells (12):
+0-1 md intro/config; 3 clone repo; 4 upgrade transformers + patch
+`utils.save` (guard `tokenizer.save_vocabulary`, which may be missing in newer
+transformers); 5 regenerate git-ignored `train_/dev_*.jsonl` via
+`process_data.py` (skips if present); 8 train the `in/after/before` subset with
+resumable per-specifier checkpoints (`RESUME` skips existing `best_model`);
+9 parameter-average merge (`train/merge_models.py --mode avg`);
+10 BEIR eval `timeqa` + `nobel_prize`; 11 copy artifacts to `/kaggle/output`.
+Config dict at the top (epochs, batch, specifiers, flags). Smoke-test hint:
+`TOTAL_EPOCHS=1, SPECIFIERS=["in"]`. Requires selector **Internet ON** + **GPU**.
+
 <!-- Append new entries at the end as work progresses. -->
