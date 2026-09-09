@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+*.pyc
+dataset/train/TimeQA/train_*.jsonl
+dataset/train/TimeQA/dev_*.jsonl
