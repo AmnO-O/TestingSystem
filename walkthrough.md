@@ -188,4 +188,21 @@ like a package: `_fake_es.__path__ = []` plus a registered
 (numpy 2.5): the lexical chain now imports cleanly; the stub is only ever
 pulled for BM25/ES, which the dense pipeline never invokes.
 
+**Fourth failure (datasets + find_spec)**: next, `beir_utils.py` imported
+`beir.reranking.models.CrossEncoder` eagerly → `sentence_transformers` →
+`datasets`, and `datasets/search.py` calls `importlib.util.find_spec("elasticsearch")`
+which raises `ValueError: elasticsearch.__spec__ is None` for our hand-built
+stub module. Two fixes in `src/beir_utils.py`:
+1. **Deleted the unused `beir.reranking` imports** (`CrossEncoder`, `Rerank`
+   were imported but never referenced) — removes the whole
+   `sentence_transformers`→`datasets` chain from the training import path.
+2. Give the stub a real `__spec__` (`importlib.util.spec_from_loader`) on both
+   `elasticsearch` and `elasticsearch.helpers`, so `find_spec` probes return a
+   spec instead of raising.
+
+Verified locally (mirroring beir_utils import order — `torch` first, then
+stub, then beir): `find_spec` OK, lexical/dense/evaluation/data_loader chains
+all import. `beir.util` needs `requests`/`tqdm` (beir 1.0.0 ships no
+`requires_dist`) — both already preinstalled on Kaggle.
+
 <!-- Append new entries at the end as work progresses. -->

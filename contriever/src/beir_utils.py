@@ -12,6 +12,7 @@ import torch.distributed as dist
 # retrieval pipeline never uses BM25/ES, so stub the module before any beir import.
 import sys
 import types as _types
+import importlib.util as _importlib_util
 
 if "elasticsearch" not in sys.modules:
 
@@ -20,8 +21,10 @@ if "elasticsearch" not in sys.modules:
 
     _fake_es = _types.ModuleType("elasticsearch")
     _fake_es.__path__ = []  # make it look like a package so submodule imports resolve
+    _fake_es.__spec__ = _importlib_util.spec_from_loader("elasticsearch", loader=None)
     _fake_es.Elasticsearch = type("Elasticsearch", (), {"__init__": _not_implemented})
     _fake_es_helpers = _types.ModuleType("elasticsearch.helpers")
+    _fake_es_helpers.__spec__ = _importlib_util.spec_from_loader("elasticsearch.helpers", loader=None)
     _fake_es_helpers.streaming_bulk = _not_implemented
     sys.modules["elasticsearch"] = _fake_es
     sys.modules["elasticsearch.helpers"] = _fake_es_helpers
@@ -30,9 +33,6 @@ import beir.util
 from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
 from beir.retrieval.search.dense import DenseRetrievalExactSearch
-
-from beir.reranking.models import CrossEncoder
-from beir.reranking import Rerank
 
 import src.dist_utils as dist_utils
 from src import normalize_text
