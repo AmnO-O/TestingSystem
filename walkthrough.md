@@ -134,4 +134,18 @@ resumable per-specifier checkpoints (`RESUME` skips existing `best_model`);
 Config dict at the top (epochs, batch, specifiers, flags). Smoke-test hint:
 `TOTAL_EPOCHS=1, SPECIFIERS=["in"]`. Requires selector **Internet ON** + **GPU**.
 
+## 11. Per-epoch logging in `contriever/finetuning.py`
+
+**Why**: the stock loop only logged every `--log_freq` steps and dev-evaluated
+every `--eval_freq` steps, so nothing fired reliably at epoch boundaries. Now,
+when training by epochs (`opt.total_epochs > 0` — our recipe), at the end of
+every epoch `finetuning()`:
+- averages that epoch's rollups into a `[epoch N] train loss: .. | train
+  accuracy: ..` line (also pushed to TB as `epoch/train/...`),
+- runs the dev `evaluate()` and prints `eval acc / eval mrr`,
+- feeds that dev acc into the `best_model` selection (so best-model tracking is
+  per-epoch rather than only every `eval_freq` steps).
+
+No new CLI flags; the Kaggle notebook's "Train per specifier" md notes this.
+
 <!-- Append new entries at the end as work progresses. -->

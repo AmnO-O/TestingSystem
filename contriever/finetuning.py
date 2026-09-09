@@ -67,6 +67,7 @@ def finetuning(opt, model, optimizer, scheduler, tokenizer, step, best_eval_acc,
     model.train()
     prev_ids, prev_mask = None, None
     while step < opt.total_steps:
+        epoch_stats = utils.WeightedAvgStats()
         logger.info(f"Start epoch {epoch}, number of batches: {len(train_dataloader)}")
         for i, batch in enumerate(train_dataloader):
             batch = {key: value.cuda() if isinstance(value, torch.Tensor) else value for key, value in batch.items()}
@@ -87,6 +88,7 @@ def finetuning(opt, model, optimizer, scheduler, tokenizer, step, best_eval_acc,
             optimizer.zero_grad()
 
             run_stats.update(iter_stats)
+            epoch_stats.update(iter_stats)
 
             if step % opt.log_freq == 0:
                 log = f"{step} / {opt.total_steps}"
@@ -124,6 +126,21 @@ def finetuning(opt, model, optimizer, scheduler, tokenizer, step, best_eval_acc,
 
             if step >= opt.total_steps:
                 break
+
+        # Modified: per-epoch summary (train loss/acc + dev acc/MRR) when training by epochs
+        if opt.total_epochs > 0:
+            summary = []
+            for k, v in sorted(epoch_stats.average_stats.items()):
+                if k.endswith(("loss", "accuracy")):
+                    summary.append(f"{k}: {v:.4f}")
+                    if tb_logger:
+                        tb_logger.add_scalar(f"epoch/{k}", v, epoch)
+            logger.info(f"[epoch {epoch}] train " + " | ".join(summary))
+            eval_acc = evaluate(opt, eval_model, tokenizer, tb_logger, step)
+            model.train()
+            if eval_acc > best_eval_acc:
+                best_eval_acc = eval_acc
+                best_model_state = copy.deepcopy(eval_model.state_dict())
 
         epoch += 1
 
