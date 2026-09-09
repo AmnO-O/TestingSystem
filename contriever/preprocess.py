@@ -6,6 +6,9 @@ import torch
 
 import transformers
 from src.normalize_text import normalize
+from src import transformers_compat
+
+transformers_compat.apply()
 
 
 def save(tensor, split_path):

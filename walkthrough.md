@@ -213,4 +213,23 @@ Renamed in all six places: notebook CONFIG, `README.md`, `plan.md`,
 `walkthrough.md`, `train/train_small.sh`, `contriever/verify_modernbert.py`.
 The retriever dispatch (`"modernbert" in model_id.lower()`) is unaffected.
 
+## 14. `batch_encode_plus` removed in transformers 5.x
+
+**Symptom**: after the base-model download succeeded (ModernBERT loaded:
+149.01M params, `Start training`), the very first eval DataLoader batch died in a
+worker:
+`AttributeError: TokenizersBackend has no attribute batch_encode_plus`.
+The notebook's `pip install -U transformers` installs 5.x, where the legacy
+`batch_encode_plus` / `encode_plus` methods were removed (verified locally on
+5.16.1: not in `PreTrainedTokenizerBase.__dict__`).
+
+**Fix**: new `contriever/src/transformers_compat.py` with `apply()`, which
+re-adds `batch_encode_plus`/`encode_plus` to `PreTrainedTokenizerBase` as a
+1:1 delegation to the modern `tokenizer(...)` entry point (all call sites —
+`finetuning_data.py`, `beir_utils.py`, `preprocess.py`,
+`generate_passage_embeddings.py`, `passage_retrieval.py` — use only kwargs that
+`__call__` accepts: `max_length/truncation/padding/add_special_tokens/return_tensors`).
+No-op on transformers 4.x. Verified on 5.16.1: method appears after `apply()`
+and correctly delegates with all kwargs preserved.
+
 <!-- Append new entries at the end as work progresses. -->

@@ -6,6 +6,9 @@ import json
 import sys
 import numpy as np
 from src import normalize_text
+from src import transformers_compat
+
+transformers_compat.apply()
 
 
 class Dataset(torch.utils.data.Dataset):

@@ -29,6 +29,10 @@ if "elasticsearch" not in sys.modules:
     sys.modules["elasticsearch"] = _fake_es
     sys.modules["elasticsearch.helpers"] = _fake_es_helpers
 
+from src import transformers_compat
+
+transformers_compat.apply()
+
 import beir.util
 from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval

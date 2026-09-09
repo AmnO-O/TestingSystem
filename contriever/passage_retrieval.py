@@ -23,6 +23,9 @@ import src.contriever
 import src.utils
 import src.slurm
 import src.data
+from src import transformers_compat
+
+transformers_compat.apply()
 from src.evaluation import calculate_matches
 import src.normalize_text
 

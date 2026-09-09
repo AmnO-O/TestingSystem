@@ -21,6 +21,9 @@ import src.contriever
 import src.utils
 import src.data
 import src.normalize_text
+from src import transformers_compat
+
+transformers_compat.apply()
 
 
 def embed_passages(args, passages, model, tokenizer):
