@@ -178,4 +178,14 @@ instantiated). `pytrec_eval` and `faiss` are preinstalled on Kaggle (beir
 1.0.0 ships no `requires_dist` metadata, so pip does not pull them); notebook
 install cell also adds `pytrec-eval` defensively.
 
+**Third failure (stub not package-like)**: with the plain-module stub, the very
+same `beir.retrieval.search.lexical.elastic_search` hit
+`ModuleNotFoundError: No module named 'elasticsearch.helpers'; 'elasticsearch'
+is not a package`. It imports BOTH `from elasticsearch import Elasticsearch`
+AND `from elasticsearch.helpers import streaming_bulk`, so the stub must look
+like a package: `_fake_es.__path__ = []` plus a registered
+`elasticsearch.helpers` submodule exposing `streaming_bulk`. Verified locally
+(numpy 2.5): the lexical chain now imports cleanly; the stub is only ever
+pulled for BM25/ES, which the dense pipeline never invokes.
+
 <!-- Append new entries at the end as work progresses. -->

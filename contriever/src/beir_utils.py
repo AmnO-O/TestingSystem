@@ -14,13 +14,17 @@ import sys
 import types as _types
 
 if "elasticsearch" not in sys.modules:
-    _fake_es = _types.ModuleType("elasticsearch")
 
     def _not_implemented(*args, **kwargs):
         raise NotImplementedError("elasticsearch is stubbed out; BM25 search is not used")
 
+    _fake_es = _types.ModuleType("elasticsearch")
+    _fake_es.__path__ = []  # make it look like a package so submodule imports resolve
     _fake_es.Elasticsearch = type("Elasticsearch", (), {"__init__": _not_implemented})
+    _fake_es_helpers = _types.ModuleType("elasticsearch.helpers")
+    _fake_es_helpers.streaming_bulk = _not_implemented
     sys.modules["elasticsearch"] = _fake_es
+    sys.modules["elasticsearch.helpers"] = _fake_es_helpers
 
 import beir.util
 from beir.datasets.data_loader import GenericDataLoader
